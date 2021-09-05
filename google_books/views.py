@@ -3,21 +3,26 @@ import urllib.request
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Book
-from rest_framework import viewsets, status
+from rest_framework import viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter
 from .serializers import BookSerializer
+
+
+class BookFilter(FilterSet):
+    published_date = CharFilter(lookup_expr='icontains')
+    authors = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Book
+        fields = ['published_date', 'authors']
 
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-
-
-    def create(self, request, *args, **kwargs):
-        serializer = BookSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = BookFilter
+    ordering_fields = ['published_date']
 
 
 @api_view(['POST'])
@@ -58,10 +63,9 @@ def db_create(request):
                     thumbnail = i["volumeInfo"]["imageLinks"]["thumbnail"]
                 except KeyError:
                     thumbnail = None
-                Book.objects.create(id=id, title=title, authors=authors, published_date=published_date, categories=categories,
+                Book.objects.create(id=id, title=title, authors=authors, published_date=published_date,
+                                    categories=categories,
                                     average_rating=average_rating, ratings_count=ratings_count, thumbnail=thumbnail)
                 id += 1
 
         return Response({"message": "Database updated"})
-
-
