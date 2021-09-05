@@ -104,7 +104,7 @@ Or by entering
 
 ## Usage
 
-* Update database with books which title contain given word => `/db/?q="war"`
+* Update database with books which title contain given word(POST method) => `/db/?q="war"`
 * List of all books => `/books/`
 * Detail view of specific book => `/books/<id>/`
 * Filter books by published_date => `/books/?published_date=1995`
