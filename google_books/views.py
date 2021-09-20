@@ -25,14 +25,15 @@ class BookViewSet(viewsets.ModelViewSet):
     ordering_fields = ['published_date']
 
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 def db_create(request):
+    if request.method == 'GET':
+        return Response({"message": "You can here add records to database by pass q parameter"})
     if request.method == 'POST':
-        Book.objects.all().delete()
         body = request.data
         q = body["q"]
-        id = 1
-        with urllib.request.urlopen(f'https://www.googleapis.com/books/v1/volumes?q={q}') as response:
+        url = "https://www.googleapis.com/books/v1/volumes?q=" + urllib.parse.quote(q)
+        with urllib.request.urlopen(url) as response:
             data = json.load(response)
             for i in data["items"]:
                 try:
@@ -63,9 +64,8 @@ def db_create(request):
                     thumbnail = i["volumeInfo"]["imageLinks"]["thumbnail"]
                 except KeyError:
                     thumbnail = None
-                Book.objects.create(id=id, title=title, authors=authors, published_date=published_date,
+                Book.objects.create(title=title, authors=authors, published_date=published_date,
                                     categories=categories,
                                     average_rating=average_rating, ratings_count=ratings_count, thumbnail=thumbnail)
-                id += 1
 
         return Response({"message": "Database updated"})
