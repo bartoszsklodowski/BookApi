@@ -1,11 +1,13 @@
 import json
 import urllib.request
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from .models import Book
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, CharFilter
 from .serializers import BookSerializer
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 
 class BookFilter(FilterSet):
@@ -18,6 +20,8 @@ class BookFilter(FilterSet):
 
 
 class BookViewSet(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -26,6 +30,8 @@ class BookViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['GET', 'POST'])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def db_create(request):
     if request.method == 'GET':
         return Response({"message": "You can here add records to database by pass q parameter"})
