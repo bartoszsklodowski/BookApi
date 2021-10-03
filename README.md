@@ -4,6 +4,8 @@
 
 Login details admin: `admin`/`Adminadmin123`
 
+Login details user: `User_1`/`Useruser123`
+
 ## Table of Contents
 * [General Info](#general-information)
 * [Technologies Used](#technologies-used)
